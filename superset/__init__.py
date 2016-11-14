@@ -17,11 +17,14 @@ from superset.source_registry import SourceRegistry
 from werkzeug.contrib.fixers import ProxyFix
 from superset import utils
 
+from flask_sslify import SSLify
 
 APP_DIR = os.path.dirname(__file__)
 CONFIG_MODULE = os.environ.get('SUPERSET_CONFIG', 'superset.config')
 
 app = Flask(__name__)
+sslify = SSLify(app)
+
 app.config.from_object(CONFIG_MODULE)
 if not app.debug:
     # In production mode, add log handler to sys.stderr.

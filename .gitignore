@@ -28,3 +28,14 @@ app.db
 node_modules
 npm-debug.log
 yarn.lock
+
+
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+venv/*
+superset_config.py
+superset_config.py~

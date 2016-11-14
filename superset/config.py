@@ -57,7 +57,7 @@ CSRF_ENABLED = True
 DEBUG = False
 
 # Whether to show the stacktrace on 500 error
-SHOW_STACKTRACE = True
+SHOW_STACKTRACE = False
 
 # Extract and use X-Forwarded-For/X-Forwarded-Proto headers?
 ENABLE_PROXY_FIX = False
@@ -66,10 +66,10 @@ ENABLE_PROXY_FIX = False
 # GLOBALS FOR APP Builder
 # ------------------------------
 # Uncomment to setup Your App name
-APP_NAME = "Superset"
+APP_NAME = "HPA Eagle"
 
 # Uncomment to setup Setup an App icon
-APP_ICON = "/static/assets/images/superset_logo.png"
+APP_ICON = "/static/assets/images/hpa_logo.png"
 
 # Druid query timezone
 # tz.tzutc() : Using utc timezone
