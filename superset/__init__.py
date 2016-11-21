@@ -26,6 +26,8 @@ app = Flask(__name__)
 sslify = SSLify(app)
 
 app.config.from_object(CONFIG_MODULE)
+conf = app.config
+
 if not app.debug:
     # In production mode, add log handler to sys.stderr.
     app.logger.addHandler(logging.StreamHandler())

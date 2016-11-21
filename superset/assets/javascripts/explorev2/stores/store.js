@@ -114,9 +114,12 @@ export const visTypes = {
         label: 'Chart Options',
         description: 'tooltip text here',
         fieldSetRows: [
+          ['metrics'],
+          ['groupby'],
           ['columns'],
           ['row_limit'],
-          ['show_legend', 'show_bar_value', 'bar_stacked'],
+          ['show_legend', 'show_bar_value'],
+          ['bar_stacked', 'order_bars'],
           ['y_axis_format', 'bottom_margin'],
           ['x_axis_label', 'y_axis_label'],
           ['reduce_x_ticks', 'contribution'],
@@ -140,7 +143,7 @@ export const visTypes = {
     controlPanelSections: [
       {
         label: null,
-        fields: [
+        fieldSetRows: [
           ['metrics', 'groupby'],
           ['limit'],
           ['pie_label_type'],
@@ -245,6 +248,7 @@ export const visTypes = {
         fieldSetRows: [
           ['table_timestamp_format'],
           ['row_limit'],
+          ['page_length'],
           ['include_search'],
         ],
       },
@@ -397,6 +401,24 @@ export const visTypes = {
           ['metric'],
           ['compare_lag'],
           ['compare_suffix'],
+          ['y_axis_format'],
+        ],
+      },
+    ],
+    fieldOverrides: {
+      y_axis_format: {
+        label: 'Number format',
+      },
+    },
+  },
+
+  big_number_total: {
+    controlPanelSections: [
+      {
+        label: null,
+        fieldSetRows: [
+          ['metric'],
+          ['subheader'],
           ['y_axis_format'],
         ],
       },
@@ -604,7 +626,7 @@ export const visTypes = {
     label: 'Heatmap',
     controlPanelSections: [
       {
-        label: null,
+        label: 'Axis & Metrics',
         fieldSetRows: [
           ['all_columns_x'],
           ['all_columns_y'],
@@ -728,7 +750,7 @@ export const fields = {
     type: 'SelectMultipleSortableField',
     label: 'Metrics',
     choices: [],
-    default: null,
+    default: [],
     description: 'One or many metrics to display',
   },
 
@@ -736,6 +758,7 @@ export const fields = {
     type: 'SelectMultipleSortableField',
     label: 'Ordering',
     choices: [],
+    default: [],
     description: 'One or many metrics to display',
   },
 
@@ -810,7 +833,7 @@ export const fields = {
                  'defines how the browser scales up the image',
   },
 
-  x_scale_interval: {
+  xscale_interval: {
     type: 'SelectField',
     label: 'XScale Interval',
     choices: formatSelectOptionsForRange(1, 50),
@@ -819,7 +842,7 @@ export const fields = {
                  'displaying the X scale',
   },
 
-  y_scale_interval: {
+  yscale_interval: {
     type: 'SelectField',
     label: 'YScale Interval',
     choices: formatSelectOptionsForRange(1, 50),
@@ -847,6 +870,13 @@ export const fields = {
     label: 'Bar Values',
     default: false,
     description: 'Show the value on top of the bar',
+  },
+
+  order_bars: {
+    type: 'CheckboxField',
+    label: 'Sort Bars',
+    default: false,
+    description: 'Sort bars by x labels.',
   },
 
   show_controls: {
@@ -902,6 +932,7 @@ export const fields = {
     type: 'SelectMultipleSortableField',
     label: 'Group by',
     choices: [],
+    default: [],
     description: 'One or many fields to group by',
   },
 
@@ -909,6 +940,7 @@ export const fields = {
     type: 'SelectMultipleSortableField',
     label: 'Columns',
     choices: [],
+    default: [],
     description: 'One or many fields to pivot as columns',
   },
 
@@ -916,6 +948,7 @@ export const fields = {
     type: 'SelectMultipleSortableField',
     label: 'Columns',
     choices: [],
+    default: [],
     description: 'Columns to display',
   },
 
@@ -1035,7 +1068,8 @@ export const fields = {
                  'expression',
   },
 
-  time_grain: {
+  time_grain_sqla: {
+    type: 'SelectField',
     label: 'Time Grain',
     choices: [],
     default: 'Time Column',
@@ -1082,6 +1116,7 @@ export const fields = {
       '28 days ago',
       '90 days ago',
       '1 year ago',
+      '100 year ago',
     ]),
     description: 'Timestamp from filter. This supports free form typing and ' +
                  'natural language as in `1 day ago`, `28 days` or `3 years`',
@@ -1280,9 +1315,17 @@ export const fields = {
   series_height: {
     type: 'FreeFormSelectField',
     label: 'Series Height',
-    default: 25,
-    choices: formatSelectOptions([10, 25, 40, 50, 75, 100, 150, 200]),
+    default: '25',
+    choices: formatSelectOptions(['10', '25', '40', '50', '75', '100', '150', '200']),
     description: 'Pixel height of each series',
+  },
+
+  page_length: {
+    type: 'FreeFormSelectField',
+    label: 'Page Length',
+    default: 0,
+    choices: formatSelectOptions([0, 10, 25, 40, 50, 75, 100, 150, 200]),
+    description: 'Rows per page, 0 means no pagination',
   },
 
   x_axis_format: {
@@ -1513,6 +1556,7 @@ export const fields = {
     type: 'SelectMultipleSortableField',
     label: 'label',
     choices: [],
+    default: [],
     description: '`count` is COUNT(*) if a group by is used. ' +
                  'Numerical columns will be aggregated with the aggregator. ' +
                  'Non-numerical columns will be used to label points. ' +
@@ -1628,34 +1672,49 @@ export const fields = {
   },
 };
 
-export function defaultFormData() {
+export function defaultFormData(vizType = 'table') {
   const data = {
     slice_name: null,
     slice_id: null,
+    datasource_name: null,
   };
-  Object.keys(fields).forEach((k) => { data[k] = fields[k].default; });
+  const { datasourceAndVizType, sqlClause } = commonControlPanelSections;
+  const viz = visTypes[vizType];
+  const sectionsToRender = [datasourceAndVizType].concat(viz.controlPanelSections, sqlClause);
+  sectionsToRender.forEach((section) => {
+    section.fieldSetRows.forEach((fieldSetRow) => {
+      fieldSetRow.forEach((k) => {
+        data[k] = fields[k].default;
+      });
+    });
+  });
   return data;
 }
 
-export const defaultViz = {
-  cached_key: null,
-  cached_timeout: null,
-  cached_dttm: null,
-  column_formats: null,
-  csv_endpoint: null,
-  is_cached: false,
-  data: [],
-  form_data: defaultFormData(),
-  json_endpoint: null,
-  query: null,
-  standalone_endpoint: null,
-};
+export function defaultViz(vizType) {
+  return {
+    cached_key: null,
+    cached_timeout: null,
+    cached_dttm: null,
+    column_formats: null,
+    csv_endpoint: null,
+    is_cached: false,
+    data: [],
+    form_data: defaultFormData(vizType),
+    json_endpoint: null,
+    query: null,
+    standalone_endpoint: null,
+  };
+}
 
-export const initialState = {
-  isDatasourceMetaLoading: false,
-  datasources: null,
-  datasource_id: null,
-  datasource_type: null,
-  fields,
-  viz: defaultViz,
-};
+export function initialState(vizType = 'table') {
+  return {
+    dashboards: [],
+    isDatasourceMetaLoading: false,
+    datasources: null,
+    datasource_type: null,
+    fields,
+    viz: defaultViz(vizType),
+    isStarred: false,
+  };
+}
