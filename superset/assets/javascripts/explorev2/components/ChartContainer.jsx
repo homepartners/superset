@@ -109,16 +109,17 @@ class ChartContainer extends React.Component {
       },
 
       clearError: () => {
-        this.props.actions.removeChartAlert();
+        // no need to do anything here since Alert is closable
+        // query button will also remove Alert
       },
 
       error(msg) {
-        this.props.actions.chartUpdateFailed(msg);
+        props.actions.chartUpdateFailed(msg);
       },
 
       d3format: (col, number) => {
         // mock d3format function in Slice object in superset.js
-        const format = this.props.column_formats[col];
+        const format = props.column_formats[col];
         return d3format(format, number);
       },
     };
@@ -181,12 +182,14 @@ class ChartContainer extends React.Component {
               />
             </Alert>
           }
-          {!this.props.isChartLoading &&
-            <div
+          {this.props.isChartLoading ?
+            (<img alt="loading" width="25" src="/static/assets/images/loading.gif" />)
+            :
+            (<div
               id={this.props.containerId}
               ref={(ref) => { this.chartContainerRef = ref; }}
               className={this.props.viz_type}
-            />
+            />)
           }
         </Panel>
       </div>
