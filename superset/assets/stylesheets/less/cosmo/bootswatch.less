@@ -1,8 +1,8 @@
-// Flatly 3.3.5
+// Forked Cosmo 3.3.7
 // Bootswatch
 // -----------------------------------------------------
 
-@web-font-path: "https://fonts.googleapis.com/css?family=Lato:400,700,400italic";
+@web-font-path: "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700";
 
 .web-font(@path) {
   @import url("@{path}");
@@ -12,44 +12,102 @@
 // Navbar =====================================================================
 
 .navbar {
-  border-width: 0;
-
-  &-default {
-
-    .badge {
-      background-color: #fff;
-      color: @navbar-default-bg;
-    }
-  }
-
+  border: none;
   &-inverse {
 
     .badge {
       background-color: #fff;
-      color: @navbar-inverse-bg;
+      color: @brand-primary;
     }
   }
+}
 
-  &-brand {
-    line-height: 1;
-  }
+.navbar-inverse {
+  border: 3px solid @navbar-inverse-bg;
+}
+
+.navbar-inverse .navbar-nav > li > a:hover,
+.navbar-inverse .navbar-nav > li > a:focus,
+.navbar-inverse .navbar-nav > li.active > a {
+  background: transparent;
+  border-bottom: 3px solid @brand-primary;
+  margin-bottom: -3px;
+}
+
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus {
+  background: transparent;
+}
+
+.navbar-nav > li > a {
+  padding-top: 18px;
 }
 
 // Buttons ====================================================================
 
-.btn {
-  border-width: 2px;
+.btn-default:hover {
+  color: #555;
+  background-color: #efefef;
 }
 
-.btn:active {
-  .box-shadow(none);
+.nav-tabs {
+  .dropdown-toggle.btn,
+  .dropdown-toggle.btn:hover,
+  .dropdown-toggle.btn:active,
+  .dropdown-toggle.btn:focus,
+  .btn-group.open .dropdown-toggle.btn,
+  .btn-group.open .dropdown-toggle.btn:hover,
+  .btn-group.open .dropdown-toggle.btn:active,
+  .btn-group.open .dropdown-toggle.btn:focus {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none;
+  }
 }
 
-.btn-group.open .dropdown-toggle {
-  .box-shadow(none);
+.caret {
+  border: none;
+  color: @gray;
 }
+
+.caret:before {
+  font-family: "FontAwesome";
+  font-size: 10px;
+  content: "\f078";
+}
+
+.caret:hover {
+  color: @gray-darker;
+}
+
+.dropdown-toggle.btn .caret {
+  margin-left: 6px;
+  margin-top: -21px;
+  margin-right: 6px;
+}
+
+.nav-tabs .dropdown-toggle.btn .caret,  {
+  margin-left: -12px;
+  margin-top: -10px;
+}
+
+.navbar-nav .caret,
+.panel-title .caret {
+  margin-left: 6px;
+  margin-top: -24px;
+  margin-right: 6px;
+}
+
+
+
+
 
 // Typography =================================================================
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
 
 .text-primary,
 .text-primary:hover {
@@ -81,10 +139,6 @@
 table,
 .table {
 
-  a:not(.btn) {
-    text-decoration: underline;
-  }
-
   .dropdown-menu a {
     text-decoration: none;
   }
@@ -95,43 +149,14 @@ table,
   .info {
     color: #fff;
 
-    > th > a,
-    > td > a,
-    > a {
+    a {
       color: #fff;
     }
-  }
-
-  > thead > tr > th,
-  > tbody > tr > th,
-  > tfoot > tr > th,
-  > thead > tr > td,
-  > tbody > tr > td,
-  > tfoot > tr > td {
-    border: none;
-  }
-
-  &-bordered > thead > tr > th,
-  &-bordered > tbody > tr > th,
-  &-bordered > tfoot > tr > th,
-  &-bordered > thead > tr > td,
-  &-bordered > tbody > tr > td,
-  &-bordered > tfoot > tr > td {
-    border: 1px solid @table-border-color;
   }
 }
 
 // Forms ======================================================================
 
-.form-control,
-input {
-  border-width: 2px;
-  .box-shadow(none);
-
-  &:focus {
-    .box-shadow(none);
-  }
-}
 
 .has-warning {
   .help-block,
@@ -149,12 +174,9 @@ input {
   }
 
   .form-control,
-  .form-control:focus {
-    border: 2px solid @brand-warning;
-  }
-
+  .form-control:focus,
   .input-group-addon {
-    border-color: @brand-warning;
+    border: 1px solid @brand-warning;
   }
 }
 
@@ -174,12 +196,9 @@ input {
   }
 
   .form-control,
-  .form-control:focus {
-    border: 2px solid @brand-danger;
-  }
-
+  .form-control:focus,
   .input-group-addon {
-    border-color: @brand-danger;
+    border: 1px solid @brand-danger;
   }
 }
 
@@ -199,87 +218,134 @@ input {
   }
 
   .form-control,
-  .form-control:focus {
-    border: 2px solid @brand-success;
-  }
-
+  .form-control:focus,
   .input-group-addon {
-    border-color: @brand-success;
+    border: 1px solid @brand-success;
   }
 }
 
 // Navs =======================================================================
 
-.nav {
-  .open > a,
-  .open > a:hover,
-  .open > a:focus {
-    border-color: transparent;
+.nav-pills {
+
+  & > li > a {
+    border-radius: 2px;
   }
 }
 
-.pager {
-  a,
-  a:hover {
-    color: #fff;
-  }
+.dropdown-menu {
 
-  .disabled {
-    &>a,
-    &>a:hover,
-    &>a:focus,
-    &>span {
-      background-color: @pagination-disabled-bg;
-    }
+  & > li > a:hover,
+  & > li > a:focus {
+    background-image: none;
   }
 }
 
 // Indicators =================================================================
 
 .close {
-  color: #fff;
   text-decoration: none;
+  text-shadow: none;
   opacity: 0.4;
 
   &:hover,
   &:focus {
-    color: #fff;
     opacity: 1;
   }
 }
 
 .alert {
+  border: none;
+}
+.alert-link {
+  text-decoration: underline;
+}
 
-  .alert-link {
-    color: #fff;
-    text-decoration: underline;
-  }
+.alert-info .alert-link {
+  color: @alert-info-text;
+}
+.alert-danger .alert-link {
+  color: @alert-danger-text;
+}
+.alert-warning .alert-link {
+  color: @alert-warning-text;
+}
+.alert-success .alert-link {
+  color: @alert-success-text;
+}
+
+.label {
+  border-radius: 2px;
+}
+label {
+  font-weight: normal;
 }
 
 // Progress bars ==============================================================
 
 .progress {
-  height: 10px;
+  height: 14px;
   .box-shadow(none);
   .progress-bar {
-    font-size: 10px;
-    line-height: 10px;
+    font-size: 12px;
+    line-height: 12px;
+    padding-top: 1px;
   }
 }
 
 // Containers =================================================================
 
-.well {
-  .box-shadow(none);
+.panel {
+  border: none;
+  &-heading,
+  &-footer {
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+  }
+
+  &-default {
+    .panel-heading {
+      padding: 15px 15px 0 15px;
+      background-color: transparent;
+    }
+    .panel-title {
+      color: @text-color;
+      padding-bottom: 5px;
+      border-bottom: 1px solid @gray-light;
+      h1, h2, h3, h4, h5, h6 {
+        margin: 10px 0 0 0;
+        font-weight: bold;
+      }
+    }
+    .close {
+      color: @text-color;
+    }
+  }
+  &-primary{
+    .panel-heading {
+      padding: 15px 15px 0 15px;
+      background-color: transparent;
+    }
+    .panel-title {
+      color: @text-color;
+      padding-bottom: 5px;
+      border-bottom: 1px solid @gray-light;
+      h1, h2, h3, h4, h5, h6 {
+        margin: 10px 0 0 0;
+        font-weight: bold;
+      }
+    }
+    .close {
+      color: @text-color;
+    }
+  }
+}
+
+.panel-title-large {
+  font-size: 24px;
 }
 
 a.list-group-item {
-
-  &.active,
-  &.active:hover,
-  &.active:focus {
-    border-color: @list-group-border;
-  }
 
   &-success {
     &.active {
@@ -296,7 +362,7 @@ a.list-group-item {
     &.active {
       background-color: @state-warning-bg;
     }
-    
+
     &.active:hover,
     &.active:focus {
       background-color: darken(@state-warning-bg, 5%);
@@ -307,18 +373,10 @@ a.list-group-item {
     &.active {
       background-color: @state-danger-bg;
     }
-    
+
     &.active:hover,
     &.active:focus {
       background-color: darken(@state-danger-bg, 5%);
-    }
-  }
-}
-
-.panel {
-  &-default {
-    .close {
-      color: @text-color;
     }
   }
 }
@@ -332,3 +390,42 @@ a.list-group-item {
 .popover {
   color: @text-color;
 }
+
+// Tabs ==============================================================
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+  background-color: #fff;
+  font-weight: bold;
+  border-top: 3px solid @brand-primary;
+}
+
+// Tables ==============================================================
+
+.table {
+  .info {
+    color: @state-info-text;
+  }
+  .danger {
+    color: @state-danger-text;
+  }
+  .warning {
+    color: @state-warning-text;
+  }
+  .success {
+    color: @state-success-text;
+  }
+}
+
+// Utils ==============================================================
+hr {
+  margin: 10px 0;
+}
+
+// generate space-n classes for vertical spacing
+.space-loop(@counter) when (@counter > 0) {
+  .space-loop((@counter - 1));    // next iteration
+  .space-@{counter} {
+    margin-bottom: (10px * @counter); // code for each iteration
+  }
+}
+.space-loop(6);

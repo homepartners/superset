@@ -1,6 +1,7 @@
 import { defaultFormData } from '../stores/store';
 import * as actions from '../actions/exploreActions';
 import { addToArr, removeFromArr, alterInArr } from '../../../utils/reducerUtils';
+import { now } from '../../modules/dates';
 
 export const exploreReducer = function (state, action) {
   const actionHandlers = {
@@ -43,9 +44,12 @@ export const exploreReducer = function (state, action) {
       const fieldNames = Object.keys(optionsByFieldName);
 
       fieldNames.forEach((fieldName) => {
-        newState.fields[fieldName].choices = optionsByFieldName[fieldName];
+        if (fieldName === 'filterable_cols') {
+          newState.filterColumnOpts = optionsByFieldName[fieldName];
+        } else {
+          newState.fields[fieldName].choices = optionsByFieldName[fieldName];
+        }
       });
-
       return Object.assign({}, state, newState);
     },
 
@@ -53,19 +57,32 @@ export const exploreReducer = function (state, action) {
       return Object.assign({}, state, { filterColumnOpts: action.filterColumnOpts });
     },
     [actions.ADD_FILTER]() {
-      return addToArr(state, 'filters', action.filter);
+      const newFormData = addToArr(state.viz.form_data, 'filters', action.filter);
+      const newState = Object.assign(
+        {},
+        state,
+        { viz: Object.assign({}, state.viz, { form_data: newFormData }) }
+      );
+      return newState;
     },
     [actions.REMOVE_FILTER]() {
-      return removeFromArr(state, 'filters', action.filter);
+      const newFormData = removeFromArr(state.viz.form_data, 'filters', action.filter);
+      return Object.assign(
+        {},
+        state,
+        { viz: Object.assign({}, state.viz, { form_data: newFormData }) }
+      );
     },
-    [actions.CHANGE_FILTER_FIELD]() {
-      return alterInArr(state, 'filters', action.filter, { field: action.field });
-    },
-    [actions.CHANGE_FILTER_OP]() {
-      return alterInArr(state, 'filters', action.filter, { op: action.op });
-    },
-    [actions.CHANGE_FILTER_VALUE]() {
-      return alterInArr(state, 'filters', action.filter, { value: action.value });
+    [actions.CHANGE_FILTER]() {
+      const changes = {};
+      changes[action.field] = action.value;
+      const newFormData = alterInArr(
+        state.viz.form_data, 'filters', action.filter, changes);
+      return Object.assign(
+        {},
+        state,
+        { viz: Object.assign({}, state.viz, { form_data: newFormData }) }
+      );
     },
     [actions.SET_FIELD_VALUE]() {
       const newFormData = action.key === 'datasource' ?
@@ -80,7 +97,8 @@ export const exploreReducer = function (state, action) {
       if (action.key === 'viz_type') {
         newFormData.previous_viz_type = state.viz.form_data.viz_type;
       }
-      newFormData[action.key] = action.value ? action.value : (!state.viz.form_data[action.key]);
+      newFormData[action.key] = (action.value !== undefined)
+        ? action.value : (!state.viz.form_data[action.key]);
       return Object.assign(
         {},
         state,
@@ -96,19 +114,32 @@ export const exploreReducer = function (state, action) {
         query: action.viz.query,
         data: action.viz.data,
       };
+      const chartUpdateEndTime = now();
       return Object.assign(
         {},
         state,
         {
           viz: Object.assign({}, state.viz, vizUpdates),
-          isChartLoading: false,
+          chartStatus: 'success',
+          chartUpdateEndTime,
         });
     },
     [actions.CHART_UPDATE_STARTED]() {
-      return Object.assign({}, state, { isChartLoading: true });
+      const chartUpdateStartTime = now();
+      return Object.assign({}, state,
+        { chartStatus: 'loading', chartUpdateEndTime: null, chartUpdateStartTime });
     },
     [actions.CHART_UPDATE_FAILED]() {
-      return Object.assign({}, state, { isChartLoading: false, chartAlert: action.error });
+      const chartUpdateEndTime = now();
+      return Object.assign({}, state,
+        { chartStatus: 'failed', chartAlert: action.error, chartUpdateEndTime });
+    },
+    [actions.UPDATE_CHART_STATUS]() {
+      const newState = Object.assign({}, state, { chartStatus: action.status });
+      if (action.status === 'success' || action.status === 'failed') {
+        newState.chartUpdateEndTime = now();
+      }
+      return newState;
     },
     [actions.REMOVE_CHART_ALERT]() {
       return Object.assign({}, state, { chartAlert: null });

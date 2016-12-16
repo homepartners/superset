@@ -1,3 +1,4 @@
+/* eslint camelcase: 0 */
 const d3 = require('d3');
 const $ = require('jquery');
 
@@ -151,4 +152,10 @@ export function slugify(string) {
           .trim()
           .replace(/[\s\W-]+/g, '-') // replace spaces, non-word chars, w/ a single dash (-)
           .replace(/-$/, ''); // remove last floating dash
+}
+
+export function getAjaxErrorMsg(error) {
+  const respJSON = error.responseJSON;
+  return (respJSON && respJSON.message) ? respJSON.message :
+          error.responseText;
 }

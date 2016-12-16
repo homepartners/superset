@@ -9,6 +9,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import imp
 import json
 import os
 
@@ -56,7 +57,7 @@ CSRF_ENABLED = True
 DEBUG = False
 
 # Whether to show the stacktrace on 500 error
-SHOW_STACKTRACE = False
+SHOW_STACKTRACE = True
 
 # Extract and use X-Forwarded-For/X-Forwarded-Proto headers?
 ENABLE_PROXY_FIX = False
@@ -65,10 +66,10 @@ ENABLE_PROXY_FIX = False
 # GLOBALS FOR APP Builder
 # ------------------------------
 # Uncomment to setup Your App name
-APP_NAME = "HPA Eagle"
+APP_NAME = "Superset"
 
 # Uncomment to setup Setup an App icon
-APP_ICON = "/static/assets/images/hpa_logo.png"
+APP_ICON = "/static/assets/images/superset-logo@2x.png"
 
 # Druid query timezone
 # tz.tzutc() : Using utc timezone
@@ -233,6 +234,9 @@ DEFAULT_DB_ID = None
 # Timeout duration for SQL Lab synchronous queries
 SQLLAB_TIMEOUT = 30
 
+# SQLLAB_DEFAULT_DBID
+SQLLAB_DEFAULT_DBID = None
+
 # An instantiated derivative of werkzeug.contrib.cache.BaseCache
 # if enabled, it can be used to store the results of long-running queries
 # in SQL Lab by using the "Run Async" button/feature
@@ -244,7 +248,18 @@ RESULTS_BACKEND = None
 # dictionary.
 JINJA_CONTEXT_ADDONS = {}
 
+# Roles that are controlled by the API / Superset and should not be changes
+# by humans.
+ROBOT_PERMISSION_ROLES = ['Public', 'Gamma', 'Alpha', 'Admin', 'sql_lab']
+
+CONFIG_PATH_ENV_VAR = 'SUPERSET_CONFIG_PATH'
+
 try:
+    if CONFIG_PATH_ENV_VAR in os.environ:
+        # Explicitly import config module that is not in pythonpath; useful
+        # for case where app is being executed via pex.
+        imp.load_source('superset_config', os.environ[CONFIG_PATH_ENV_VAR])
+
     from superset_config import *  # noqa
     print('Loaded your LOCAL configuration')
 except ImportError:

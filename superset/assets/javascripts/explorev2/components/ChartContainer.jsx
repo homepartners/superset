@@ -7,6 +7,13 @@ import { d3format } from '../../modules/utils';
 import ExploreActionButtons from '../../explore/components/ExploreActionButtons';
 import FaveStar from '../../components/FaveStar';
 import TooltipWrapper from '../../components/TooltipWrapper';
+import Timer from '../../components/Timer';
+
+const CHART_STATUS_MAP = {
+  failed: 'danger',
+  loading: 'warning',
+  success: 'success',
+};
 
 const propTypes = {
   actions: PropTypes.object.isRequired,
@@ -22,9 +29,12 @@ const propTypes = {
   query: PropTypes.string.isRequired,
   column_formats: PropTypes.object,
   data: PropTypes.any,
-  isChartLoading: PropTypes.bool,
+  chartStatus: PropTypes.bool,
   isStarred: PropTypes.bool.isRequired,
+  chartUpdateStartTime: PropTypes.string.isRequired,
+  chartUpdateEndTime: PropTypes.string.isRequired,
   alert: PropTypes.string,
+  table_name: PropTypes.string,
 };
 
 class ChartContainer extends React.Component {
@@ -133,6 +143,42 @@ class ChartContainer extends React.Component {
     visMap[this.props.viz_type](this.state.mockSlice).render();
   }
 
+  renderChartTitle() {
+    let title;
+    if (this.props.slice_name) {
+      title = this.props.slice_name;
+    } else {
+      title = `[${this.props.table_name}] - untitled`;
+    }
+    return title;
+  }
+
+  renderChart() {
+    if (this.props.alert) {
+      return (
+        <Alert bsStyle="warning">
+          {this.props.alert}
+          <i
+            className="fa fa-close pull-right"
+            onClick={this.removeAlert.bind(this)}
+            style={{ cursor: 'pointer' }}
+          />
+        </Alert>
+      );
+    }
+    if (this.props.chartStatus === 'loading') {
+      return (<img alt="loading" width="25" src="/static/assets/images/loading.gif" />);
+    }
+    return (
+      <div
+        id={this.props.containerId}
+        ref={(ref) => { this.chartContainerRef = ref; }}
+        className={this.props.viz_type}
+        style={{ overflowX: 'scroll' }}
+      />
+    );
+  }
+
   render() {
     return (
       <div className="chart-container">
@@ -141,29 +187,40 @@ class ChartContainer extends React.Component {
           header={
             <div
               id="slice-header"
-              className="panel-title"
+              className="clearfix panel-title-large"
             >
-              {this.props.slice_name}
+              {this.renderChartTitle()}
 
-              <FaveStar
-                sliceId={this.props.slice_id}
-                actions={this.props.actions}
-                isStarred={this.props.isStarred}
-              />
+              {this.props.slice_id &&
+                <span>
+                  <FaveStar
+                    sliceId={this.props.slice_id}
+                    actions={this.props.actions}
+                    isStarred={this.props.isStarred}
+                  />
 
-              <TooltipWrapper
-                label="edit-desc"
-                tooltip="Edit Description"
-              >
-                <a
-                  className="edit-desc-icon"
-                  href={`/slicemodelview/edit/${this.props.slice_id}`}
-                >
-                  <i className="fa fa-edit" />
-                </a>
-              </TooltipWrapper>
+                  <TooltipWrapper
+                    label="edit-desc"
+                    tooltip="Edit Description"
+                  >
+                    <a
+                      className="edit-desc-icon"
+                      href={`/slicemodelview/edit/${this.props.slice_id}`}
+                    >
+                      <i className="fa fa-edit" />
+                    </a>
+                  </TooltipWrapper>
+                </span>
+              }
 
               <div className="pull-right">
+                <Timer
+                  startTime={this.props.chartUpdateStartTime}
+                  endTime={this.props.chartUpdateEndTime}
+                  isRunning={this.props.chartStatus === 'loading'}
+                  state={CHART_STATUS_MAP[this.props.chartStatus]}
+                  style={{ 'font-size': '10px', 'margin-right': '5px' }}
+                />
                 <ExploreActionButtons
                   slice={this.state.mockSlice}
                   canDownload={this.props.can_download}
@@ -172,25 +229,7 @@ class ChartContainer extends React.Component {
             </div>
           }
         >
-          {this.props.alert &&
-            <Alert bsStyle="warning">
-              {this.props.alert}
-              <i
-                className="fa fa-close pull-right"
-                onClick={this.removeAlert.bind(this)}
-                style={{ cursor: 'pointer' }}
-              />
-            </Alert>
-          }
-          {this.props.isChartLoading ?
-            (<img alt="loading" width="25" src="/static/assets/images/loading.gif" />)
-            :
-            (<div
-              id={this.props.containerId}
-              ref={(ref) => { this.chartContainerRef = ref; }}
-              className={this.props.viz_type}
-            />)
-          }
+          {this.renderChart()}
         </Panel>
       </div>
     );
@@ -209,12 +248,15 @@ function mapStateToProps(state) {
     csv_endpoint: state.viz.csv_endpoint,
     json_endpoint: state.viz.json_endpoint,
     standalone_endpoint: state.viz.standalone_endpoint,
+    chartUpdateStartTime: state.chartUpdateStartTime,
+    chartUpdateEndTime: state.chartUpdateEndTime,
     query: state.viz.query,
     column_formats: state.viz.column_formats,
     data: state.viz.data,
-    isChartLoading: state.isChartLoading,
+    chartStatus: state.chartStatus,
     isStarred: state.isStarred,
     alert: state.chartAlert,
+    table_name: state.viz.form_data.datasource_name,
   };
 }
 
